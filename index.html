@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VR Sim Racing Performance Calculator - RTX 50/40/30 & AMD GPUs</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        select, input[type="range"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        input[type="range"] {
+            padding: 0;
+        }
+        .slider-value {
+            display: inline-block;
+            margin-left: 10px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        .gpu-result {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            background: white;
+            border: 1px solid #e0e0e0;
+        }
+        .gpu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .gpu-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .fps-value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .fps-good { color: #28a745; }
+        .fps-okay { color: #ffc107; }
+        .fps-bad { color: #dc3545; }
+        .gpu-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        .recommendation {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+        }
+        .comparison-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+        .gpu-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .amd-warning {
+            background: #ffebee;
+            border: 1px solid #ffcdd2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>VR Sim Racing Performance Calculator - RTX 50/40/30 & AMD GPUs</h1>
+        
+        <div class="gpu-selector">
+            <div class="input-group">
+                <label for="gpu1">Primary GPU (Your VR Rig):</label>
+                <select id="gpu1">
+                    <optgroup label="NVIDIA RTX 50 Series">
+                        <option value="5090">RTX 5090</option>
+                        <option value="5080">RTX 5080</option>
+                        <option value="5070ti">RTX 5070 Ti</option>
+                        <option value="5070">RTX 5070</option>
+                        <option value="5060ti16">RTX 5060 Ti 16GB</option>
+                        <option value="5060ti">RTX 5060 Ti 8GB</option>
+                        <option value="5060">RTX 5060</option>
+                    </optgroup>
+                    <optgroup label="NVIDIA RTX 40 Series">
+                        <option value="4090">RTX 4090</option>
+                        <option value="4080s" selected>RTX 4080 Super</option>
+                        <option value="4080">RTX 4080</option>
+                        <option value="4070tis">RTX 4070 Ti Super</option>
+                        <option value="4070ti">RTX 4070 Ti</option>
+                        <option value="4070s">RTX 4070 Super</option>
+                        <option value="4070">RTX 4070</option>
+                        <option value="4060ti16">RTX 4060 Ti 16GB</option>
+                        <option value="4060ti">RTX 4060 Ti 8GB</option>
+                        <option value="4060">RTX 4060</option>
+                    </optgroup>
+                    <optgroup label="NVIDIA RTX 30 Series">
+                        <option value="3090ti">RTX 3090 Ti</option>
+                        <option value="3090">RTX 3090</option>
+                        <option value="3080ti">RTX 3080 Ti</option>
+                        <option value="3080">RTX 3080 10GB</option>
+                        <option value="3070ti">RTX 3070 Ti</option>
+                        <option value="3070">RTX 3070</option>
+                        <option value="3060ti">RTX 3060 Ti</option>
+                        <option value="3060">RTX 3060 12GB</option>
+                    </optgroup>
+                    <optgroup label="AMD Radeon RX 7000">
+                        <option value="7900xtx">RX 7900 XTX</option>
+                        <option value="7900xt">RX 7900 XT</option>
+                        <option value="7800xt">RX 7800 XT</option>
+                        <option value="7700xt">RX 7700 XT</option>
+                        <option value="7600">RX 7600</option>
+                    </optgroup>
+                    <optgroup label="AMD Radeon RX 6000">
+                        <option value="6950xt">RX 6950 XT</option>
+                        <option value="6900xt">RX 6900 XT</option>
+                        <option value="6800xt">RX 6800 XT</option>
+                        <option value="6800">RX 6800</option>
+                        <option value="6700xt">RX 6700 XT</option>
+                    </optgroup>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label for="gpu2">Comparison GPU (Optional):</label>
+                <select id="gpu2">
+                    <option value="">None</option>
+                    <optgroup label="NVIDIA RTX 50 Series">
+                        <option value="5090">RTX 5090</option>
+                        <option value="5080">RTX 5080</option>
+                        <option value="5070ti">RTX 5070 Ti</option>
+                        <option value="5070">RTX 5070</option>
+                        <option value="5060ti16">RTX 5060 Ti 16GB</option>
+                        <option value="5060ti">RTX 5060 Ti 8GB</option>
+                        <option value="5060">RTX 5060</option>
+                    </optgroup>
+                    <optgroup label="NVIDIA RTX 40 Series">
+                        <option value="4090">RTX 4090</option>
+                        <option value="4080s">RTX 4080 Super</option>
+                        <option value="4080">RTX 4080</option>
+                        <option value="4070tis" selected>RTX 4070 Ti Super</option>
+                        <option value="4070ti">RTX 4070 Ti</option>
+                        <option value="4070s">RTX 4070 Super</option>
+                        <option value="4070">RTX 4070</option>
+                        <option value="4060ti16">RTX 4060 Ti 16GB</option>
+                        <option value="4060ti">RTX 4060 Ti 8GB</option>
+                        <option value="4060">RTX 4060</option>
+                    </optgroup>
+                    <optgroup label="NVIDIA RTX 30 Series">
+                        <option value="3090ti">RTX 3090 Ti</option>
+                        <option value="3090">RTX 3090</option>
+                        <option value="3080ti">RTX 3080 Ti</option>
+                        <option value="3080">RTX 3080 10GB</option>
+                        <option value="3070ti">RTX 3070 Ti</option>
+                        <option value="3070">RTX 3070</option>
+                        <option value="3060ti">RTX 3060 Ti</option>
+                        <option value="3060">RTX 3060 12GB</option>
+                    </optgroup>
+                    <optgroup label="AMD Radeon RX 7000">
+                        <option value="7900xtx">RX 7900 XTX</option>
+                        <option value="7900xt">RX 7900 XT</option>
+                        <option value="7800xt">RX 7800 XT</option>
+                        <option value="7700xt">RX 7700 XT</option>
+                        <option value="7600">RX 7600</option>
+                    </optgroup>
+                    <optgroup label="AMD Radeon RX 6000">
+                        <option value="6950xt">RX 6950 XT</option>
+                        <option value="6900xt">RX 6900 XT</option>
+                        <option value="6800xt">RX 6800 XT</option>
+                        <option value="6800">RX 6800</option>
+                        <option value="6700xt">RX 6700 XT</option>
+                    </optgroup>
+                </select>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="game">Game:</label>
+            <select id="game">
+                <option value="ac-modded">Assetto Corsa (Sol + CSP + Pure)</option>
+                <option value="iracing">iRacing</option>
+                <option value="acc">Assetto Corsa Competizione</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label for="resolution">Quest 3 Resolution Multiplier:</label>
+            <input type="range" id="resolution" min="0.8" max="1.5" step="0.1" value="1.4">
+            <span class="slider-value" id="resolutionValue">1.4x</span>
+        </div>
+
+        <div class="input-group">
+            <label for="refreshRate">Refresh Rate:</label>
+            <select id="refreshRate">
+                <option value="90">90 Hz</option>
+                <option value="120">120 Hz</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label for="gridSize">Grid Size / AI Cars:</label>
+            <input type="range" id="gridSize" min="1" max="40" value="20">
+            <span class="slider-value" id="gridSizeValue">20 cars</span>
+        </div>
+
+        <div class="input-group">
+            <label for="weather">Weather Conditions:</label>
+            <select id="weather">
+                <option value="clear">Clear</option>
+                <option value="cloudy">Cloudy</option>
+                <option value="rain">Rain</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label for="quality">Graphics Quality Target:</label>
+            <select id="quality">
+                <option value="ultra" selected>Ultra (Max everything)</option>
+                <option value="high">High (Balanced)</option>
+                <option value="medium">Medium (Performance)</option>
+            </select>
+        </div>
+
+        <div class="results">
+            <h2>Performance Prediction</h2>
+            
+            <div id="gpuResults"></div>
+            
+            <div class="comparison-section" id="comparisonSection" style="display: none;">
+                <h3>Performance Comparison</h3>
+                <div id="comparisonDetails"></div>
+            </div>
+
+            <div class="recommendation" id="recommendation">
+                Select your settings above to see performance predictions and recommendations.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // GPU Performance Database (relative to RTX 4080 Super = 100)
+        const gpuData = {
+            // NVIDIA RTX 50 Series
+            '5090': { name: 'RTX 5090', perf: 130, vram: 32, bandwidth: 1790, vendor: 'nvidia' },
+            '5080': { name: 'RTX 5080', perf: 110, vram: 16, bandwidth: 960, vendor: 'nvidia' },
+            '5070ti': { name: 'RTX 5070 Ti', perf: 96, vram: 16, bandwidth: 896, vendor: 'nvidia' },
+            '5070': { name: 'RTX 5070', perf: 67, vram: 12, bandwidth: 672, vendor: 'nvidia' }, // Note: "4090 performance" only with DLSS 4 MFG
+            '5060ti16': { name: 'RTX 5060 Ti 16GB', perf: 48, vram: 16, bandwidth: 448, vendor: 'nvidia' },
+            '5060ti': { name: 'RTX 5060 Ti 8GB', perf: 48, vram: 8, bandwidth: 448, vendor: 'nvidia' },
+            '5060': { name: 'RTX 5060', perf: 35, vram: 8, bandwidth: 448, vendor: 'nvidia' },
+            
+            // NVIDIA RTX 40 Series
+            '4090': { name: 'RTX 4090', perf: 130, vram: 24, bandwidth: 1008, vendor: 'nvidia' },
+            '4080s': { name: 'RTX 4080 Super', perf: 100, vram: 16, bandwidth: 736, vendor: 'nvidia' },
+            '4080': { name: 'RTX 4080', perf: 96, vram: 16, bandwidth: 716, vendor: 'nvidia' },
+            '4070tis': { name: 'RTX 4070 Ti Super', perf: 78, vram: 16, bandwidth: 672, vendor: 'nvidia' },
+            '4070ti': { name: 'RTX 4070 Ti', perf: 72, vram: 12, bandwidth: 504, vendor: 'nvidia' },
+            '4070s': { name: 'RTX 4070 Super', perf: 68, vram: 12, bandwidth: 504, vendor: 'nvidia' },
+            '4070': { name: 'RTX 4070', perf: 58, vram: 12, bandwidth: 504, vendor: 'nvidia' },
+            '4060ti16': { name: 'RTX 4060 Ti 16GB', perf: 42, vram: 16, bandwidth: 288, vendor: 'nvidia' },
+            '4060ti': { name: 'RTX 4060 Ti 8GB', perf: 42, vram: 8, bandwidth: 288, vendor: 'nvidia' },
+            '4060': { name: 'RTX 4060', perf: 32, vram: 8, bandwidth: 272, vendor: 'nvidia' },
+            
+            // NVIDIA RTX 30 Series
+            '3090ti': { name: 'RTX 3090 Ti', perf: 85, vram: 24, bandwidth: 1008, vendor: 'nvidia' },
+            '3090': { name: 'RTX 3090', perf: 78, vram: 24, bandwidth: 936, vendor: 'nvidia' },
+            '3080ti': { name: 'RTX 3080 Ti', perf: 75, vram: 12, bandwidth: 912, vendor: 'nvidia' },
+            '3080': { name: 'RTX 3080 10GB', perf: 68, vram: 10, bandwidth: 760, vendor: 'nvidia' },
+            '3070ti': { name: 'RTX 3070 Ti', perf: 52, vram: 8, bandwidth: 608, vendor: 'nvidia' },
+            '3070': { name: 'RTX 3070', perf: 45, vram: 8, bandwidth: 448, vendor: 'nvidia' },
+            '3060ti': { name: 'RTX 3060 Ti', perf: 38, vram: 8, bandwidth: 448, vendor: 'nvidia' },
+            '3060': { name: 'RTX 3060 12GB', perf: 28, vram: 12, bandwidth: 360, vendor: 'nvidia' },
+            
+            // AMD RX 7000 Series (VR performance typically 15-20% lower than raster would suggest)
+            '7900xtx': { name: 'RX 7900 XTX', perf: 75, vram: 24, bandwidth: 960, vendor: 'amd' },
+            '7900xt': { name: 'RX 7900 XT', perf: 65, vram: 20, bandwidth: 800, vendor: 'amd' },
+            '7800xt': { name: 'RX 7800 XT', perf: 48, vram: 16, bandwidth: 624, vendor: 'amd' },
+            '7700xt': { name: 'RX 7700 XT', perf: 38, vram: 12, bandwidth: 432, vendor: 'amd' },
+            '7600': { name: 'RX 7600', perf: 25, vram: 8, bandwidth: 288, vendor: 'amd' },
+            
+            // AMD RX 6000 Series
+            '6950xt': { name: 'RX 6950 XT', perf: 62, vram: 16, bandwidth: 576, vendor: 'amd' },
+            '6900xt': { name: 'RX 6900 XT', perf: 58, vram: 16, bandwidth: 512, vendor: 'amd' },
+            '6800xt': { name: 'RX 6800 XT', perf: 52, vram: 16, bandwidth: 512, vendor: 'amd' },
+            '6800': { name: 'RX 6800', perf: 45, vram: 16, bandwidth: 512, vendor: 'amd' },
+            '6700xt': { name: 'RX 6700 XT', perf: 32, vram: 12, bandwidth: 384, vendor: 'amd' }
+        };
+
+        // Performance data based on research
+        const performanceData = {
+            'ac-modded': {
+                baseFps: 140, // Base FPS for 4080 Super
+                weatherImpact: { clear: 1.0, cloudy: 0.9, rain: 0.65 },
+                gridImpact: 0.015,
+                qualityImpact: { ultra: 0.7, high: 0.85, medium: 1.0 }
+            },
+            'iracing': {
+                baseFps: 160,
+                weatherImpact: { clear: 1.0, cloudy: 0.95, rain: 0.75 },
+                gridImpact: 0.012,
+                qualityImpact: { ultra: 0.8, high: 0.9, medium: 1.0 }
+            },
+            'acc': {
+                baseFps: 125,
+                weatherImpact: { clear: 1.0, cloudy: 0.88, rain: 0.6 },
+                gridImpact: 0.018,
+                qualityImpact: { ultra: 0.65, high: 0.8, medium: 1.0 }
+            }
+        };
+
+        function calculateFPS() {
+            const gpu1 = document.getElementById('gpu1').value;
+            const gpu2 = document.getElementById('gpu2').value;
+            const game = document.getElementById('game').value;
+            const resolution = parseFloat(document.getElementById('resolution').value);
+            const refreshRate = parseInt(document.getElementById('refreshRate').value);
+            const gridSize = parseInt(document.getElementById('gridSize').value);
+            const weather = document.getElementById('weather').value;
+            const quality = document.getElementById('quality').value;
+
+            const gameData = performanceData[game];
+            
+            // Resolution impact calculation
+            const resolutionImpact = Math.pow(1.2 / resolution, 1.8);
+            
+            // Refresh rate impact
+            const refreshImpact = refreshRate === 120 ? 0.88 : 1.0;
+            
+            // Grid size impact
+            const gridImpact = 1 - ((gridSize - 1) * gameData.gridImpact);
+            
+            // Calculate GPU1 performance
+            const gpu1Data = gpuData[gpu1];
+            const gpu1Fps = calculateGpuFps(gpu1Data, gameData, resolutionImpact, refreshImpact, gridImpact, weather, quality);
+            
+            // Update display
+            let resultsHtml = createGpuResult(gpu1Data, gpu1Fps, refreshRate, true);
+            
+            // Calculate GPU2 if selected
+            if (gpu2) {
+                const gpu2Data = gpuData[gpu2];
+                const gpu2Fps = calculateGpuFps(gpu2Data, gameData, resolutionImpact, refreshImpact, gridImpact, weather, quality);
+                resultsHtml += createGpuResult(gpu2Data, gpu2Fps, refreshRate, false);
+                
+                // Show comparison
+                updateComparison(gpu1Data, gpu1Fps, gpu2Data, gpu2Fps, refreshRate);
+                document.getElementById('comparisonSection').style.display = 'block';
+            } else {
+                document.getElementById('comparisonSection').style.display = 'none';
+            }
+            
+            document.getElementById('gpuResults').innerHTML = resultsHtml;
+            updateRecommendation(gpu1Data, gpu1Fps, refreshRate, game, quality, resolution);
+        }
+
+        function calculateGpuFps(gpuData, gameData, resolutionImpact, refreshImpact, gridImpact, weather, quality) {
+            let fps = gameData.baseFps * (gpuData.perf / 100) * resolutionImpact * refreshImpact * 
+                     gridImpact * gameData.weatherImpact[weather] * gameData.qualityImpact[quality];
+            
+            // Apply AMD VR penalty
+            if (gpuData.vendor === 'amd') {
+                fps *= 0.85; // AMD cards typically perform 15% worse in VR
+            }
+            
+            // Apply bandwidth limitation penalty for cards with <600 GB/s
+            if (gpuData.bandwidth < 600) {
+                const bandwidthPenalty = 0.8 + (gpuData.bandwidth / 3000);
+                fps *= bandwidthPenalty;
+            }
+            
+            return fps;
+        }
+
+        function createGpuResult(gpuData, fps, targetFps, isPrimary) {
+            const fpsClass = getFpsClass(fps, targetFps);
+            const stability = getStability(fps, targetFps);
+            const label = isPrimary ? 'Primary GPU' : 'Comparison GPU';
+            
+            let html = `
+                <div class="gpu-result">
+                    <div class="gpu-header">
+                        <div>
+                            <div class="gpu-name">${gpuData.name}</div>
+                            <div style="font-size: 14px; color: #666;">${label}</div>
+                        </div>
+                        <div>
+                            <div class="fps-value ${fpsClass}">${Math.round(fps)} FPS</div>
+                            <div style="font-size: 14px; text-align: right;">${stability}</div>
+                        </div>
+                    </div>
+                    <div class="gpu-details">
+                        <div>VRAM: ${gpuData.vram}GB</div>
+                        <div>Bandwidth: ${gpuData.bandwidth} GB/s</div>
+                        <div>Performance Score: ${gpuData.perf}</div>
+                    </div>
+            `;
+            
+            if (gpuData.vendor === 'amd') {
+                html += `<div class="warning amd-warning">⚠️ AMD GPUs typically underperform in VR compared to their rasterization performance</div>`;
+            }
+            
+            if (gpuData.name === 'RTX 5090') {
+                html += `<div class="warning">⚡ Requires 575W TDP and robust cooling. Ensure your PSU can handle the load (850W+ recommended)</div>`;
+            }
+            
+            if (gpuData.name.includes('5060')) {
+                html += `<div class="warning">⚠️ 128-bit memory bus limits VR performance. Best suited for 1080p or low resolution multipliers</div>`;
+            }
+            
+            if (gpuData.bandwidth < 500 && fps < targetFps) {
+                html += `<div class="warning">⚠️ Low memory bandwidth may cause stuttering in VR at high resolutions</div>`;
+            }
+            
+            html += `</div>`;
+            return html;
+        }
+
+        function getFpsClass(fps, target) {
+            if (fps >= target * 0.95) return 'fps-good';
+            if (fps >= target * 0.75) return 'fps-okay';
+            return 'fps-bad';
+        }
+
+        function getStability(fps, target) {
+            if (fps >= target * 0.95) return '✓ Native performance';
+            if (fps >= target * 0.75) return '⚠ ASW/Reprojection needed';
+            return '✗ Poor experience';
+        }
+
+        function updateComparison(gpu1Data, gpu1Fps, gpu2Data, gpu2Fps, targetFps) {
+            const perfDiff = ((gpu1Fps / gpu2Fps - 1) * 100).toFixed(0);
+            const better = gpu1Fps > gpu2Fps ? gpu1Data.name : gpu2Data.name;
+            const worse = gpu1Fps > gpu2Fps ? gpu2Data.name : gpu1Data.name;
+            
+            let html = `<p>The <strong>${better}</strong> is ${Math.abs(perfDiff)}% faster than the <strong>${worse}</strong> in this scenario.</p>`;
+            
+            if (gpu1Fps >= targetFps && gpu2Fps < targetFps * 0.75) {
+                html += `<p>⚡ Only the ${better} can deliver native ${targetFps} FPS without reprojection.</p>`;
+            }
+            
+            document.getElementById('comparisonDetails').innerHTML = html;
+        }
+
+        function updateRecommendation(gpuData, fps, targetFps, game, quality, resolution) {
+            const rec = document.getElementById('recommendation');
+            let message = '';
+            
+            const pixels = Math.round(2064 * 2208 * 2 * resolution * resolution / 1000000);
+            
+            if (fps >= targetFps * 0.95) {
+                message = `<strong>✓ Excellent:</strong> The ${gpuData.name} delivers native ${targetFps} FPS at these settings. You'll have a smooth, responsive VR experience.`;
+            } else if (fps >= targetFps * 0.75) {
+                message = `<strong>⚠ Good with compromises:</strong> The ${gpuData.name} needs ASW/reprojection to maintain ${targetFps} Hz. Consider lowering settings for native performance.`;
+            } else {
+                message = `<strong>✗ Insufficient:</strong> The ${gpuData.name} struggles at these settings. Significantly reduce resolution or quality for playable performance.`;
+            }
+            
+            // Specific recommendations
+            if (gpuData.vram < 12 && resolution > 1.2) {
+                message += `<br><br>⚠️ With only ${gpuData.vram}GB VRAM, consider reducing resolution multiplier to avoid texture streaming issues.`;
+            }
+            
+            if (game === 'ac-modded' && quality === 'ultra' && fps < targetFps) {
+                message += '<br><br>💡 Tip: Sol/CSP effects are very demanding. Try "High" quality or disable some CSP features like Extra FX.';
+            }
+            
+            if (gpuData.vendor === 'amd') {
+                message += '<br><br>🔧 For AMD GPUs: Ensure you have the latest drivers and consider using FSR in supported games for better performance.';
+            }
+            
+            if (gpuData.name.includes('50')) {
+                message += '<br><br>🚀 RTX 50 series bonus: DLSS 4 with Multi Frame Generation can significantly boost performance, but adds latency. Native performance shown here.';
+            }
+            
+            if (gpuData.bandwidth < 500 && resolution > 1.2) {
+                message += '<br><br>⚠️ Limited memory bandwidth may cause stuttering at high VR resolutions. Consider reducing resolution multiplier.';
+            }
+            
+            message += `<br><br>📊 Rendering ${pixels}M pixels at ${targetFps} Hz (${(pixels * targetFps).toFixed(0)}M pixels/sec)`;
+            
+            rec.innerHTML = message;
+        }
+
+        // Event listeners
+        document.getElementById('gpu1').addEventListener('change', calculateFPS);
+        document.getElementById('gpu2').addEventListener('change', calculateFPS);
+        document.getElementById('game').addEventListener('change', calculateFPS);
+        document.getElementById('resolution').addEventListener('input', function() {
+            document.getElementById('resolutionValue').textContent = this.value + 'x';
+            calculateFPS();
+        });
+        document.getElementById('refreshRate').addEventListener('change', calculateFPS);
+        document.getElementById('gridSize').addEventListener('input', function() {
+            document.getElementById('gridSizeValue').textContent = this.value + ' cars';
+            calculateFPS();
+        });
+        document.getElementById('weather').addEventListener('change', calculateFPS);
+        document.getElementById('quality').addEventListener('change', calculateFPS);
+
+        // Initial calculation
+        calculateFPS();
+    </script>
+</body>
+</html>
